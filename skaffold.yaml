@@ -1,0 +1,31 @@
+apiVersion: skaffold/v1alpha2
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.DOCKER_REGISTRY}}/upendrasahu/golang-helloworld-upen:{{.VERSION}}"
+  artifacts:
+  - imageName: changeme
+    workspace: .
+    docker: {}
+  local: {}
+deploy:
+  kubectl:
+    manifests:
+profiles:
+- name: dev
+  build:
+    tagPolicy:
+      envTemplate:
+        template: "{{.DOCKER_REGISTRY}}/upendrasahu/golang-helloworld-upen:{{.DIGEST_HEX}}"
+    artifacts:
+    - docker: {}
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: golang-helloworld-upen
+        chartPath: charts/golang-helloworld-upen
+        setValueTemplates:
+          image.repository: "{{.DOCKER_REGISTRY}}/upendrasahu/golang-helloworld-upen"
+          image.tag: "{{.DIGEST_HEX}}"
